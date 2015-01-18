@@ -27,8 +27,10 @@ Configure
 {
   "jackal": {
     "assets": {
-      "provider": "aws",
-      "credentials": {
+      "connection": {
+        "provider": "aws",
+        "credentials": {
+        }
       },
       "bucket": "BUCKET_NAME"
     }
