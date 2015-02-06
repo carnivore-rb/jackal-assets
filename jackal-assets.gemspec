@@ -13,5 +13,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'jackal'
   s.add_dependency 'miasma'
   s.add_dependency 'miasma-local'
+  s.add_dependency 'rubyzip'
   s.files = Dir['{lib}/**/**/*'] + %w(jackal-assets.gemspec README.md CHANGELOG.md)
 end
