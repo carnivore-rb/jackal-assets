@@ -57,7 +57,7 @@ module Jackal
       def get(key)
         remote_file = bucket.files.reload.get(key)
         if(remote_file)
-          remote_file.body
+          remote_file.body.io
         else
           raise Error::NotFound.new "Remote file does not exist! (<#{bucket}>:#{key})"
         end
@@ -101,6 +101,69 @@ module Jackal
           remote_file.url(expires_in)
         else
           raise Error::NotFound.new "Remote file does not exist! (<#{bucket}>:#{key})"
+        end
+      end
+
+      # Pack directory into compressed file
+      #
+      # @param directory [String]
+      # @param name [String] tmp file base name
+      # @return [File]
+      def pack(directory, name=nil)
+        tmp_file = Tempfile.new(name || File.basename(directory))
+        file_path = "#{tmp_file.path}.zip"
+        tmp_file.delete
+        entries = Hash[
+          Dir.glob(File.join(directory, '**', '{*,.*}')).map do |path|
+            next if path.end_with?('.')
+            [path.sub(%r{#{Regexp.escape(directory)}/?}, ''), path]
+          end
+        ]
+        Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
+          entries.keys.sort.each do |entry|
+            path = entries[entry]
+            if(File.directory?(path))
+              zipfile.mkdir(entry.dup)
+            else
+              zipfile.add(entry, path)
+            end
+          end
+        end
+        file = File.open(file_path, 'rb')
+        file
+      end
+
+      # Unpack object
+      #
+      # @param object [File]
+      # @param destination [String]
+      # @param args [Symbol] argument list (:disable_overwrite)
+      # @return [String] destination
+      def unpack(object, destination, *args)
+        if(File.exists?(destination) && args.include?(:disable_overwrite))
+          destination
+        else
+          unless(File.directory?(destination))
+            FileUtils.mkdir_p(destination)
+          end
+          if(object.respond_to?(:path))
+            to_unpack = object.path
+          elsif(object.respond_to?(:io))
+            to_unpack = object.io
+          else
+            to_unpack = object
+          end
+          zfile = Zip::File.new(to_unpack)
+          zfile.restore_permissions = true
+          zfile.each do |entry|
+            new_dest = File.join(destination, entry.name)
+            if(File.exists?(new_dest))
+              FileUtils.rm_rf(new_dest)
+            end
+            entry.restore_permissions = true
+            entry.extract(new_dest)
+          end
+          destination
         end
       end
 
