@@ -47,7 +47,10 @@ module Jackal
             )
           )
         )
-        @bucket = @connection.buckets.build(:name => bucket_name).save
+        @bucket = @connection.buckets.get(bucket_name)
+        unless(@bucket)
+          @bucket = @connection.buckets.build(:name => bucket_name).save
+        end
       end
 
       # Fetch object
