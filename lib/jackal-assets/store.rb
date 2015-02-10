@@ -1,4 +1,5 @@
 require 'jackal-assets'
+require 'zip'
 
 module Jackal
   module Assets
