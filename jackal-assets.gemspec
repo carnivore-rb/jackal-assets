@@ -10,9 +10,10 @@ Gem::Specification.new do |s|
   s.description = 'Jackal Assets'
   s.license = 'Apache 2.0'
   s.require_path = 'lib'
-  s.add_dependency 'jackal'
-  s.add_dependency 'miasma'
-  s.add_dependency 'miasma-local'
-  s.add_dependency 'rubyzip'
+  s.add_runtime_dependency 'jackal'
+  s.add_runtime_dependency 'miasma'
+  s.add_runtime_dependency 'miasma-local'
+  s.add_runtime_dependency 'rubyzip'
+  s.add_runtime_dependency 'bogo', '> 0.1.14'
   s.files = Dir['{lib}/**/**/*'] + %w(jackal-assets.gemspec README.md CHANGELOG.md)
 end

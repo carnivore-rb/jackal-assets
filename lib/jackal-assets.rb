@@ -1,5 +1,6 @@
 require 'miasma'
 require 'miasma-local'
+require 'bogo'
 
 module Jackal
   # Asset storage helper

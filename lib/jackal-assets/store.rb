@@ -62,7 +62,17 @@ module Jackal
       def get(key)
         remote_file = bucket.files.reload.get(key)
         if(remote_file)
-          remote_file.body.io
+          io = remote_file.body.io
+          if(io.respond_to?(:path))
+            io
+          else
+            e_file = Bogo::EphemeralFile.new('jackal-asset')
+            while(data = io.readpartial(2048))
+              e_file.write data
+            end
+            e_file.rewind
+            e_file
+          end
         else
           raise Error::NotFound.new "Remote file does not exist! (<#{bucket}>:#{key})"
         end
@@ -158,14 +168,6 @@ module Jackal
           else
             to_unpack = object
           end
-          unless(to_unpack.respond_to?(:path))
-            t_file = Tempfile.new('jackal-asset')
-            while(data = to_unpack.readpartial(2048))
-              t_file.write data
-            end
-            t_file.rewind
-            to_unpack = t_file
-          end
           zfile = Zip::File.new(to_unpack)
           zfile.restore_permissions = true
           zfile.each do |entry|
@@ -176,7 +178,6 @@ module Jackal
             entry.restore_permissions = true
             entry.extract(new_dest)
           end
-          t_file.delete if t_file
           destination
         end
       end
