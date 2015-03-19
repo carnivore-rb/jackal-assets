@@ -71,6 +71,7 @@ module Jackal
             while(data = io.readpartial(2048))
               e_file.write data
             end
+            e_file.flush
             e_file.rewind
             e_file
           end
