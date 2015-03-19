@@ -91,8 +91,6 @@ module Jackal
       def put(key, file)
         remote_file = bucket.files.reload.get(key) ||
           bucket.files.build(:name => key)
-        file.flush
-        file.rewind
         remote_file.body = file
         remote_file.save
         true
