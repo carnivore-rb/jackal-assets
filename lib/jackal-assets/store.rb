@@ -68,8 +68,11 @@ module Jackal
           else
             e_file = Bogo::EphemeralFile.new('jackal-asset')
             e_file.binmode
-            while(data = io.readpartial(2048))
-              e_file.write data
+            begin
+              while(data = io.readpartial(2048))
+                e_file.write data
+              end
+            rescue EOFError
             end
             e_file.flush
             e_file.rewind
@@ -88,6 +91,8 @@ module Jackal
       def put(key, file)
         remote_file = bucket.files.reload.get(key) ||
           bucket.files.build(:name => key)
+        file.flush
+        file.rewind
         remote_file.body = file
         remote_file.save
         true
