@@ -67,6 +67,7 @@ module Jackal
             io
           else
             e_file = Bogo::EphemeralFile.new('jackal-asset')
+            e_file.binmode
             while(data = io.readpartial(2048))
               e_file.write data
             end
