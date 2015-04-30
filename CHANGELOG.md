@@ -1,3 +1,8 @@
+# v0.1.4
+* Fix remote asset to avoid streaming issues
+* Prevent EOF errors when reading to end of file on java
+* Always enable binmode on temp files
+
 # v0.1.2
 * Include support for packing and unpacking assets
 * Return proper IO-ish object from #get
