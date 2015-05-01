@@ -60,7 +60,9 @@ module Jackal
       # @param key [String]
       # @return [File]
       def get(key)
-        remote_file = bucket.files.reload.get(key)
+        remote_file = bucket.files.filter(:prefix => key).detect do |item|
+          item.name == key
+        end
         if(remote_file)
           io = remote_file.body.io
           if(io.respond_to?(:path))
@@ -79,7 +81,7 @@ module Jackal
             e_file
           end
         else
-          raise Error::NotFound.new "Remote file does not exist! (<#{bucket}>:#{key})"
+          raise Error::NotFound.new "Remote file does not exist! (<#{bucket.name}>:#{key})"
         end
       end
 
