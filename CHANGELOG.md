@@ -1,3 +1,6 @@
+# v0.1.6
+* Use #filter on files collection to get file
+
 # v0.1.4
 * Fix remote asset to avoid streaming issues
 * Prevent EOF errors when reading to end of file on java
