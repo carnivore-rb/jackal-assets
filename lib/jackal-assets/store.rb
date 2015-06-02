@@ -73,6 +73,9 @@ module Jackal
             begin
               while(data = io.readpartial(2048))
                 e_file.write data
+                if(block_given?)
+                  yield data
+                end
               end
             rescue EOFError
             end
