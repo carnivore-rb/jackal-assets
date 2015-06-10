@@ -1,3 +1,6 @@
+# v0.1.8
+* Add block support for yielding on read chunks
+
 # v0.1.6
 * Use #filter on files collection to get file
 
