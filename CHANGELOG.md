@@ -1,3 +1,6 @@
+# v0.1.10
+* [fix] include block support on read chunks for IO
+
 # v0.1.8
 * Add block support for yielding on read chunks
 
