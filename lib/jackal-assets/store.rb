@@ -66,6 +66,16 @@ module Jackal
         if(remote_file)
           io = remote_file.body.io
           if(io.respond_to?(:path))
+            io.rewind
+            if(block_given?)
+              begin
+                while(data = io.readpartial(2048))
+                  yield data
+                end
+              rescue EOFError
+              end
+            end
+            io.rewind
             io
           else
             e_file = Bogo::EphemeralFile.new('jackal-asset')
