@@ -60,7 +60,7 @@ module Jackal
       # @param key [String]
       # @return [File]
       def get(key)
-        remote_file = bucket.files.filter(:prefix => key).detect do |item|
+        remote_file = bucket.files.reload.filter(:prefix => key).detect do |item|
           item.name == key
         end
         if(remote_file)
@@ -89,6 +89,7 @@ module Jackal
               end
             rescue EOFError
             end
+            e_file.fsync
             e_file.flush
             e_file.rewind
             e_file
@@ -145,16 +146,15 @@ module Jackal
       # @param name [String] tmp file base name
       # @return [File]
       def pack(directory, name=nil)
-        tmp_file = Tempfile.new(name || File.basename(directory))
-        file_path = "#{tmp_file.path}.zip"
-        tmp_file.delete
+        tmp_file = Bogo::EphemeralFile.new(name || File.basename(directory))
+        tmp_file.binmode
         entries = Hash[
           Dir.glob(File.join(directory, '**', '{*,.*}')).map do |path|
             next if path.end_with?('.')
             [path.sub(%r{#{Regexp.escape(directory)}/?}, ''), path]
           end
         ]
-        Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
+        Zip::File.open(tmp_file.path, Zip::File::CREATE) do |zipfile|
           entries.keys.sort.each do |entry|
             path = entries[entry]
             if(File.directory?(path))
@@ -164,8 +164,8 @@ module Jackal
             end
           end
         end
-        file = File.open(file_path, 'rb')
-        file
+        tmp_file.rewind
+        tmp_file
       end
 
       # Unpack object
