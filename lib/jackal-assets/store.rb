@@ -146,15 +146,17 @@ module Jackal
       # @param name [String] tmp file base name
       # @return [File]
       def pack(directory, name=nil)
-        tmp_file = Bogo::EphemeralFile.new(name || File.basename(directory))
-        tmp_file.binmode
+        tmp_file = Tempfile.new(name || File.basename(directory))
+        tmp_path = tmp_file.path
+        tmp_file.close
+        tmp_file.delete
         entries = Hash[
           Dir.glob(File.join(directory, '**', '{*,.*}')).map do |path|
             next if path.end_with?('.')
             [path.sub(%r{#{Regexp.escape(directory)}/?}, ''), path]
           end
         ]
-        Zip::File.open(tmp_file.path, Zip::File::CREATE) do |zipfile|
+        Zip::File.open(tmp_path, Zip::File::CREATE) do |zipfile|
           entries.keys.sort.each do |entry|
             path = entries[entry]
             if(File.directory?(path))
@@ -164,7 +166,7 @@ module Jackal
             end
           end
         end
-        tmp_file.rewind
+        tmp_file = File.open(tmp_path, 'rb')
         tmp_file
       end
 
